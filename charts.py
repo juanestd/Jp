@@ -8,8 +8,8 @@ from datetime import datetime
 
 
 def mostrar_graficas_consumado():
-    from data import cargar_datos
-    df = cargar_datos()
+    from data import cargar_datos_cxc
+    df = cargar_datos_cxc()
     ventas_por_cliente = df.groupby('CUSTOMER')['TOTAL US$'].sum()
 
     plt.figure(figsize=(12, 8))
@@ -31,8 +31,8 @@ def mostrar_graficas_consumado():
 
 # Función para mostrar cuánto debe cada empresa
 def mostrar_deudas_por_empresa():
-    from data import cargar_datos
-    df = cargar_datos()
+    from data import cargar_datos_cxc
+    df = cargar_datos_cxc()
     deudas_por_empresa = df.groupby('CUSTOMER')['CREDIT'].sum()
 
     plt.figure(figsize=(12, 8))
@@ -54,8 +54,8 @@ def mostrar_deudas_por_empresa():
 
 # Función para consultar los créditos por empresa y periodo
 def consultar_creditos_por_empresa():
-    from data import cargar_datos
-    df = cargar_datos()
+    from data import cargar_datos_cxc
+    df = cargar_datos_cxc()
 
     app = QApplication([])
     dialog = QDialog()
@@ -97,8 +97,8 @@ def consultar_creditos_por_empresa():
     dialog.exec_()
 
 def procesar_consulta(empresa, fecha_inicio, fecha_fin):
-    from data import cargar_datos
-    df = cargar_datos()
+    from data import cargar_datos_cxc
+    df = cargar_datos_cxc()
     
     # Convertir la columna de fechas a datetime
     df['DATE'] = pd.to_datetime(df['DATE'])
@@ -139,8 +139,8 @@ def procesar_consulta(empresa, fecha_inicio, fecha_fin):
 
 # Función para filtrar y graficar
 def filtrar_y_graficar(cliente, fecha_inicio, fecha_fin):
-    from data import cargar_datos
-    df = cargar_datos()
+    from data import cargar_datos_cxc
+    df = cargar_datos_cxc()
     
     # Convertir la columna de fechas a datetime
     df['DATE'] = pd.to_datetime(df['DATE'])

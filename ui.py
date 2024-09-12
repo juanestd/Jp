@@ -1,23 +1,17 @@
 from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel,
-    QComboBox, QDateEdit, QMenuBar, QAction, QMenu, QDialog,
-    QHBoxLayout
+    QMainWindow, QWidget, QVBoxLayout, QPushButton, QMenuBar, QAction, QMenu, QLabel
 )
-from PyQt5.QtCore import QDate
 from PyQt5.QtGui import QFont
-from data import cargar_datos
 from charts import (
     mostrar_graficas_consumado, mostrar_deudas_por_empresa, 
     consultar_creditos_por_empresa, filtrar_y_graficar
 )
 
-# Cargamos los datos al iniciar la aplicación
-df = cargar_datos()
-
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("JP FLOWERS ANALITICAS")
+
+        self.setWindowTitle("JP FLOWERS - MENÚ PRINCIPAL")
         self.setGeometry(100, 100, 800, 600)
         self.initUI()
 
@@ -26,79 +20,138 @@ class VentanaPrincipal(QMainWindow):
         self.setCentralWidget(widget)
         layout = QVBoxLayout()
 
-        # Menú principal
         menu_bar = QMenuBar()
         self.setMenuBar(menu_bar)
         menu = QMenu("Opciones", self)
         menu_bar.addMenu(menu)
 
-        # Acción para cerrar la aplicación
         action_salir = QAction("Salir", self)
         action_salir.triggered.connect(self.close)
         menu.addAction(action_salir)
 
-        # Botón para ver el consumado de las ventas por cliente
-        boton_consumado = QPushButton("Ver el consumado de las ventas por cliente")
-        boton_consumado.setFont(QFont('Arial', 12))
-        boton_consumado.clicked.connect(mostrar_graficas_consumado)
-        layout.addWidget(boton_consumado)
+        boton_cxc = QPushButton("Clientes Internacionales (CXC)")
+        boton_cxc.setFont(QFont('Arial', 12))
+        boton_cxc.clicked.connect(self.abrir_modulo_cxc)
+        layout.addWidget(boton_cxc)
 
-        # Botón para ver el consumado de todos los créditos
-        boton_creditos = QPushButton("Ver consumado de todos los créditos")
-        boton_creditos.setFont(QFont('Arial', 12))
-        boton_creditos.clicked.connect(self.mostrar_deudas_por_empresa)
-        layout.addWidget(boton_creditos)
+        boton_rem_nal = QPushButton("Clientes Nacionales (REM NAL)")
+        boton_rem_nal.setFont(QFont('Arial', 12))
+        boton_rem_nal.clicked.connect(self.abrir_modulo_rem_nal)
+        layout.addWidget(boton_rem_nal)
 
-        # Botón para consultar los créditos por empresa
-        boton_consultar_creditos = QPushButton("Consultar créditos por empresa")
-        boton_consultar_creditos.setFont(QFont('Arial', 12))
-        boton_consultar_creditos.clicked.connect(self.consultar_creditos_por_empresa)
-        layout.addWidget(boton_consultar_creditos)
+        boton_facturas_nal = QPushButton("Facturación Nacional")
+        boton_facturas_nal.setFont(QFont('Arial', 12))
+        boton_facturas_nal.clicked.connect(self.abrir_modulo_facturas_nal)
+        layout.addWidget(boton_facturas_nal)
 
-        # Botón para generar la gráfica filtrada
-        boton_filtrar = QPushButton("Generar Gráfica de Ventas")
-        boton_filtrar.setFont(QFont('Arial', 12))
-        boton_filtrar.clicked.connect(self.mostrar_filtros_grafica)
-        layout.addWidget(boton_filtrar)
+        boton_creditos_reclamos = QPushButton("Créditos y Reclamos")
+        boton_creditos_reclamos.setFont(QFont('Arial', 12))
+        boton_creditos_reclamos.clicked.connect(self.abrir_modulo_creditos_reclamos)
+        layout.addWidget(boton_creditos_reclamos)
 
         widget.setLayout(layout)
 
-    def mostrar_filtros_grafica(self):
-        dialog = QDialog()
-        dialog.setWindowTitle('Filtrar Ventas para Gráfico')
+    def abrir_modulo_cxc(self):
+        self.modulo_cxc = VentanaCXC()
+        self.modulo_cxc.show()
+
+    def abrir_modulo_rem_nal(self):
+        self.modulo_rem_nal = VentanaREMNAL()
+        self.modulo_rem_nal.show()
+
+    def abrir_modulo_facturas_nal(self):
+        self.modulo_facturas_nal = VentanaFacturasNAL()
+        self.modulo_facturas_nal.show()
+
+    def abrir_modulo_creditos_reclamos(self):
+        self.modulo_creditos_reclamos = VentanaCreditosReclamos()
+        self.modulo_creditos_reclamos.show()
+
+
+# Ventana para Clientes Internacionales (CXC)
+class VentanaCXC(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Clientes Internacionales (CXC)")
+        self.setGeometry(100, 100, 800, 600)
+        self.initUI()
+
+    def initUI(self):
+        widget = QWidget()
         layout = QVBoxLayout()
 
-        cliente_label = QLabel("Selecciona el cliente:")
-        layout.addWidget(cliente_label)
+        # Crear los botones
+        boton_grafica_consumado = QPushButton("Mostrar Ventas por Cliente")
+        boton_grafica_consumado.setFont(QFont('Arial', 12))
+        boton_grafica_consumado.clicked.connect(mostrar_graficas_consumado)
+        layout.addWidget(boton_grafica_consumado)
 
-        cliente_combo = QComboBox()
-        clientes = df['CUSTOMER'].dropna().unique()
-        cliente_combo.addItems(sorted(map(str, clientes)))
-        layout.addWidget(cliente_combo)
+        boton_deudas_empresa = QPushButton("Mostrar Deudas por Empresa")
+        boton_deudas_empresa.setFont(QFont('Arial', 12))
+        boton_deudas_empresa.clicked.connect(mostrar_deudas_por_empresa)
+        layout.addWidget(boton_deudas_empresa)
 
-        fecha_inicio_edit = QDateEdit(calendarPopup=True)
-        fecha_inicio_edit.setDate(QDate.currentDate())
-        layout.addWidget(QLabel("Selecciona la fecha de inicio:"))
-        layout.addWidget(fecha_inicio_edit)
+        boton_consultar_creditos = QPushButton("Consultar Créditos por Empresa")
+        boton_consultar_creditos.setFont(QFont('Arial', 12))
+        boton_consultar_creditos.clicked.connect(consultar_creditos_por_empresa)
+        layout.addWidget(boton_consultar_creditos)
 
-        fecha_fin_edit = QDateEdit(calendarPopup=True)
-        fecha_fin_edit.setDate(QDate.currentDate())
-        layout.addWidget(QLabel("Selecciona la fecha de fin:"))
-        layout.addWidget(fecha_fin_edit)
+        boton_filtrar_graficar = QPushButton("Filtrar y Graficar Ventas por Cliente")
+        boton_filtrar_graficar.setFont(QFont('Arial', 12))
+        boton_filtrar_graficar.clicked.connect(filtrar_y_graficar)  # Conectar a la función correspondiente
+        layout.addWidget(boton_filtrar_graficar)
 
-        boton_generar = QPushButton("Generar Gráfica")
-        boton_generar.clicked.connect(lambda: self.generar_grafica(cliente_combo.currentText(), fecha_inicio_edit.date().toPyDate(), fecha_fin_edit.date().toPyDate()))
-        layout.addWidget(boton_generar)
+        # Agregar el layout al widget
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
 
-        dialog.setLayout(layout)
-        dialog.exec_()
 
-    def generar_grafica(self, cliente, fecha_inicio, fecha_fin):
-        filtrar_y_graficar(cliente, fecha_inicio, fecha_fin)
+# Ventana para Clientes Nacionales (REM NAL)
+class VentanaREMNAL(QMainWindow):
+    def __init__(self):
+        super().__init__()
 
-    def mostrar_deudas_por_empresa(self):
-        mostrar_deudas_por_empresa()
+        self.setWindowTitle("Clientes Nacionales (REM NAL)")
+        self.setGeometry(100, 100, 800, 600)
+        self.initUI()
 
-    def consultar_creditos_por_empresa(self):
-        consultar_creditos_por_empresa()
+    def initUI(self):
+        widget = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("Esta es la ventana para Clientes Nacionales"))
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
 
+# Ventana para Facturación Nacional (FACTURAS NAL)
+class VentanaFacturasNAL(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Facturación Nacional (FACTURAS NAL)")
+        self.setGeometry(100, 100, 800, 600)
+        self.initUI()
+
+    def initUI(self):
+        widget = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("Esta es la ventana para Facturación Nacional"))
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+# Ventana para Créditos y Reclamos
+class VentanaCreditosReclamos(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+
+        self.setWindowTitle("Créditos y Reclamos")
+        self.setGeometry(100, 100, 800, 600)
+        self.initUI()
+
+    def initUI(self):
+        widget = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("Esta es la ventana para Créditos y Reclamos"))
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
