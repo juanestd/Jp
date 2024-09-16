@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QPushButton, QMenuBar, QAction, QMenu, QLabel, QStackedWidget
 )
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
+from PyQt5.QtCore import Qt
 from charts import (
     mostrar_graficas_consumado, mostrar_deudas_por_empresa, 
     consultar_creditos_por_empresa, filtrar_y_graficar,
@@ -21,6 +22,11 @@ class VentanaPrincipal(QMainWindow):
         self.setCentralWidget(widget)
         layout = QVBoxLayout()
 
+        # Cambiar el fondo de la ventana
+        palette = self.palette()
+        palette.setColor(QPalette.Window, QColor(30, 30, 30))  # Fondo oscuro
+        self.setPalette(palette)
+
         menu_bar = QMenuBar()
         self.setMenuBar(menu_bar)
         menu = QMenu("Opciones", self)
@@ -30,31 +36,26 @@ class VentanaPrincipal(QMainWindow):
         action_salir.triggered.connect(self.close)
         menu.addAction(action_salir)
 
-        self.stacked_widget = QStackedWidget()  # Widget para contener las diferentes vistas
+        self.stacked_widget = QStackedWidget()
         layout.addWidget(self.stacked_widget)
 
         self.pantalla_principal = QWidget()
         pantalla_layout = QVBoxLayout()
 
-        # Botones para Clientes Internacionales (CXC)
-        boton_cxc = QPushButton("Clientes Internacionales (CXC)")
-        boton_cxc.setFont(QFont('Arial', 12))
+        # Botones con estilo personalizado
+        boton_cxc = self.crear_boton_con_icono("Clientes Internacionales (CXC)", "icons/monitor_icon.png")
         boton_cxc.clicked.connect(self.abrir_modulo_cxc)
         pantalla_layout.addWidget(boton_cxc)
 
-        # Botones para Clientes Nacionales (REM NAL)
-        boton_rem_nal = QPushButton("Clientes Nacionales (REM NAL)")
-        boton_rem_nal.setFont(QFont('Arial', 12))
+        boton_rem_nal = self.crear_boton_con_icono("Clientes Nacionales (REM NAL)", "icons/database_icon.png")
         boton_rem_nal.clicked.connect(self.abrir_modulo_rem_nal)
         pantalla_layout.addWidget(boton_rem_nal)
 
-        boton_facturas_nal = QPushButton("Facturación Nacional")
-        boton_facturas_nal.setFont(QFont('Arial', 12))
+        boton_facturas_nal = self.crear_boton_con_icono("Facturación Nacional", "icons/invoice_icon.png")
         boton_facturas_nal.clicked.connect(self.abrir_modulo_facturas_nal)
         pantalla_layout.addWidget(boton_facturas_nal)
 
-        boton_creditos_reclamos = QPushButton("Créditos y Reclamos")
-        boton_creditos_reclamos.setFont(QFont('Arial', 12))
+        boton_creditos_reclamos = self.crear_boton_con_icono("Créditos y Reclamos", "icons/gear_icon.png")
         boton_creditos_reclamos.clicked.connect(self.abrir_modulo_creditos_reclamos)
         pantalla_layout.addWidget(boton_creditos_reclamos)
 
@@ -62,6 +63,25 @@ class VentanaPrincipal(QMainWindow):
         self.stacked_widget.addWidget(self.pantalla_principal)
 
         widget.setLayout(layout)
+
+    # Función para crear botones con iconos y estilo personalizado
+    def crear_boton_con_icono(self, texto, icono):
+        boton = QPushButton(texto)
+        boton.setFont(QFont('Arial', 12))
+        boton.setIcon(QIcon(icono))
+        boton.setStyleSheet("""
+            QPushButton {
+                background-color: #1a1a1a;
+                color: #00ffff;
+                border: 2px solid #00ffff;
+                border-radius: 10px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #333333;
+            }
+        """)
+        return boton
 
     # Funciones para cambiar de módulo sin abrir nuevas ventanas
     def abrir_modulo_cxc(self):
@@ -93,33 +113,46 @@ class VentanaCXC(QWidget):
 
         layout = QVBoxLayout()
 
-        boton_grafica_consumado = QPushButton("Mostrar Ventas por Cliente")
-        boton_grafica_consumado.setFont(QFont('Arial', 12))
+        boton_grafica_consumado = self.crear_boton_con_icono("Mostrar Ventas por Cliente", "icons/chart_icon.png")
         boton_grafica_consumado.clicked.connect(mostrar_graficas_consumado)
         layout.addWidget(boton_grafica_consumado)
 
-        boton_deudas_empresa = QPushButton("Mostrar Deudas por Empresa")
-        boton_deudas_empresa.setFont(QFont('Arial', 12))
+        boton_deudas_empresa = self.crear_boton_con_icono("Mostrar Deudas por Empresa", "icons/debt_icon.png")
         boton_deudas_empresa.clicked.connect(mostrar_deudas_por_empresa)
         layout.addWidget(boton_deudas_empresa)
 
-        boton_consultar_creditos = QPushButton("Consultar Créditos por Empresa")
-        boton_consultar_creditos.setFont(QFont('Arial', 12))
+        boton_consultar_creditos = self.crear_boton_con_icono("Consultar Créditos por Empresa", "icons/credit_icon.png")
         boton_consultar_creditos.clicked.connect(consultar_creditos_por_empresa)
         layout.addWidget(boton_consultar_creditos)
 
-        boton_filtrar_graficar = QPushButton("Filtrar y Graficar Ventas por Cliente")
-        boton_filtrar_graficar.setFont(QFont('Arial', 12))
+        boton_filtrar_graficar = self.crear_boton_con_icono("Filtrar y Graficar Ventas por Cliente", "icons/filter_icon.png")
         boton_filtrar_graficar.clicked.connect(filtrar_y_graficar)
         layout.addWidget(boton_filtrar_graficar)
 
-        # Botón para regresar al menú principal
-        boton_regresar = QPushButton("Regresar al Menú Principal")
-        boton_regresar.setFont(QFont('Arial', 12))
+        boton_regresar = self.crear_boton_con_icono("Regresar al Menú Principal", "icons/back_icon.png")
         boton_regresar.clicked.connect(self.regresar_menu_principal)
         layout.addWidget(boton_regresar)
 
         self.setLayout(layout)
+
+    # Función para crear botones con iconos y estilo personalizado
+    def crear_boton_con_icono(self, texto, icono):
+        boton = QPushButton(texto)
+        boton.setFont(QFont('Arial', 12))
+        boton.setIcon(QIcon(icono))
+        boton.setStyleSheet("""
+            QPushButton {
+                background-color: #1a1a1a;
+                color: #00ffff;
+                border: 2px solid #00ffff;
+                border-radius: 10px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #333333;
+            }
+        """)
+        return boton
 
     def regresar_menu_principal(self):
         self.stacked_widget.setCurrentIndex(0)
@@ -133,27 +166,41 @@ class VentanaREMNAL(QWidget):
 
         layout = QVBoxLayout()
 
-        boton_consumado_cliente = QPushButton("Ver consumado de ventas por cliente")
-        boton_consumado_cliente.setFont(QFont('Arial', 12))
+        boton_consumado_cliente = self.crear_boton_con_icono("Ver consumado de ventas por cliente", "icons/chart_icon.png")
         boton_consumado_cliente.clicked.connect(ver_consumado_por_cliente)
         layout.addWidget(boton_consumado_cliente)
 
-        boton_todas_ventas = QPushButton("Ver todas las ventas")
-        boton_todas_ventas.setFont(QFont('Arial', 12))
+        boton_todas_ventas = self.crear_boton_con_icono("Ver todas las ventas", "icons/sales_icon.png")
         boton_todas_ventas.clicked.connect(ver_todas_las_ventas)
         layout.addWidget(boton_todas_ventas)
 
-        boton_devoluciones_empresa = QPushButton("Ver devoluciones por empresa")
-        boton_devoluciones_empresa.setFont(QFont('Arial', 12))
+        boton_devoluciones_empresa = self.crear_boton_con_icono("Ver devoluciones por empresa", "icons/return_icon.png")
         boton_devoluciones_empresa.clicked.connect(ver_devoluciones_por_empresa)
         layout.addWidget(boton_devoluciones_empresa)
 
-        boton_regresar = QPushButton("Regresar al Menú Principal")
-        boton_regresar.setFont(QFont('Arial', 12))
+        boton_regresar = self.crear_boton_con_icono("Regresar al Menú Principal", "icons/back_icon.png")
         boton_regresar.clicked.connect(self.regresar_menu_principal)
         layout.addWidget(boton_regresar)
 
         self.setLayout(layout)
+
+    def crear_boton_con_icono(self, texto, icono):
+        boton = QPushButton(texto)
+        boton.setFont(QFont('Arial', 12))
+        boton.setIcon(QIcon(icono))
+        boton.setStyleSheet("""
+            QPushButton {
+                background-color: #1a1a1a;
+                color: #00ffff;
+                border: 2px solid #00ffff;
+                border-radius: 10px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #333333;
+            }
+        """)
+        return boton
 
     def regresar_menu_principal(self):
         self.stacked_widget.setCurrentIndex(0)
@@ -168,12 +215,29 @@ class VentanaFacturasNAL(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(QLabel("Esta es la ventana para Facturación Nacional"))
 
-        boton_regresar = QPushButton("Regresar al Menú Principal")
-        boton_regresar.setFont(QFont('Arial', 12))
+        boton_regresar = self.crear_boton_con_icono("Regresar al Menú Principal", "icons/back_icon.png")
         boton_regresar.clicked.connect(self.regresar_menu_principal)
         layout.addWidget(boton_regresar)
 
         self.setLayout(layout)
+
+    def crear_boton_con_icono(self, texto, icono):
+        boton = QPushButton(texto)
+        boton.setFont(QFont('Arial', 12))
+        boton.setIcon(QIcon(icono))
+        boton.setStyleSheet("""
+            QPushButton {
+                background-color: #1a1a1a;
+                color: #00ffff;
+                border: 2px solid #00ffff;
+                border-radius: 10px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #333333;
+            }
+        """)
+        return boton
 
     def regresar_menu_principal(self):
         self.stacked_widget.setCurrentIndex(0)
@@ -188,12 +252,29 @@ class VentanaCreditosReclamos(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(QLabel("Esta es la ventana para Créditos y Reclamos"))
 
-        boton_regresar = QPushButton("Regresar al Menú Principal")
-        boton_regresar.setFont(QFont('Arial', 12))
+        boton_regresar = self.crear_boton_con_icono("Regresar al Menú Principal", "icons/back_icon.png")
         boton_regresar.clicked.connect(self.regresar_menu_principal)
         layout.addWidget(boton_regresar)
 
         self.setLayout(layout)
+
+    def crear_boton_con_icono(self, texto, icono):
+        boton = QPushButton(texto)
+        boton.setFont(QFont('Arial', 12))
+        boton.setIcon(QIcon(icono))
+        boton.setStyleSheet("""
+            QPushButton {
+                background-color: #1a1a1a;
+                color: #00ffff;
+                border: 2px solid #00ffff;
+                border-radius: 10px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #333333;
+            }
+        """)
+        return boton
 
     def regresar_menu_principal(self):
         self.stacked_widget.setCurrentIndex(0)
