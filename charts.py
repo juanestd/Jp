@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-import mplcursors
 import pandas as pd
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QLabel, QComboBox, QDateEdit, QApplication, QMessageBox
 from PyQt5.QtCore import QDate
 from datetime import datetime
 
+
+# Funciones para Clientes Internacionales (CXC)
 
 def mostrar_graficas_consumado():
     from data import cargar_datos_cxc
@@ -21,15 +22,12 @@ def mostrar_graficas_consumado():
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.grid(axis='y', linestyle='--', alpha=0.7)
 
-   
     for container in ax.containers:
         ax.bar_label(container, label_type='edge', fontsize=10)
 
-    mplcursors.cursor(hover=True)  
     plt.tight_layout()
     plt.show()
 
-# Función para mostrar cuánto debe cada empresa
 def mostrar_deudas_por_empresa():
     from data import cargar_datos_cxc
     df = cargar_datos_cxc()
@@ -44,15 +42,12 @@ def mostrar_deudas_por_empresa():
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.grid(axis='y', linestyle='--', alpha=0.7)
 
-    # Mostrar valores encima de las barras
     for container in ax.containers:
         ax.bar_label(container, label_type='edge', fontsize=10)
 
-    mplcursors.cursor(hover=True)  # Añadir interactividad
     plt.tight_layout()
     plt.show()
 
-# Función para consultar los créditos por empresa y periodo
 def consultar_creditos_por_empresa():
     from data import cargar_datos_cxc
     df = cargar_datos_cxc()
@@ -99,20 +94,16 @@ def consultar_creditos_por_empresa():
 def procesar_consulta(empresa, fecha_inicio, fecha_fin):
     from data import cargar_datos_cxc
     df = cargar_datos_cxc()
-    
-    # Convertir la columna de fechas a datetime
+
     df['DATE'] = pd.to_datetime(df['DATE'])
-    
-    # Convertir las fechas de entrada a datetime
     fecha_inicio = pd.to_datetime(fecha_inicio)
     fecha_fin = pd.to_datetime(fecha_fin)
-    
+
     df_filtrado = df[(df['CUSTOMER'] == empresa) &
                      (df['DATE'] >= fecha_inicio) &
                      (df['DATE'] <= fecha_fin)]
 
     if df_filtrado.empty:
-        # Mostrar mensaje si no hay datos
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText(f"La empresa {empresa} no tiene créditos en este periodo de tiempo.")
@@ -130,31 +121,25 @@ def procesar_consulta(empresa, fecha_inicio, fecha_fin):
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         ax.grid(axis='y', linestyle='--', alpha=0.7)
 
-        # Mostrar valores encima de las barras
         for container in ax.containers:
             ax.bar_label(container, label_type='edge', fontsize=10)
 
         plt.tight_layout()
         plt.show()
 
-# Función para filtrar y graficar
 def filtrar_y_graficar(cliente, fecha_inicio, fecha_fin):
     from data import cargar_datos_cxc
     df = cargar_datos_cxc()
-    
-    # Convertir la columna de fechas a datetime
+
     df['DATE'] = pd.to_datetime(df['DATE'])
-    
-    # Convertir las fechas de entrada a datetime
     fecha_inicio = pd.to_datetime(fecha_inicio)
     fecha_fin = pd.to_datetime(fecha_fin)
-    
+
     df_filtrado = df[(df['CUSTOMER'] == cliente) &
                      (df['DATE'] >= fecha_inicio) &
                      (df['DATE'] <= fecha_fin)]
 
     if df_filtrado.empty:
-        # Mostrar mensaje si no hay datos
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText(f"No hay ventas para el cliente {cliente} en este periodo de tiempo.")
@@ -172,7 +157,155 @@ def filtrar_y_graficar(cliente, fecha_inicio, fecha_fin):
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         ax.grid(axis='y', linestyle='--', alpha=0.7)
 
-        # Mostrar valores encima de las barras
+        for container in ax.containers:
+            ax.bar_label(container, label_type='edge', fontsize=10)
+
+        plt.tight_layout()
+        plt.show()
+        
+def ver_consumado_por_cliente():
+    from data import cargar_datos_rem_nal
+    df = cargar_datos_rem_nal()
+    app = QApplication([])
+
+    dialog = QDialog()
+    dialog.setWindowTitle('Ver consumado de ventas por cliente')
+
+    layout = QVBoxLayout()
+
+    cliente_label = QLabel("Selecciona el cliente:")
+    layout.addWidget(cliente_label)
+
+    cliente_combo = QComboBox()
+    clientes = df['CLIENTE'].dropna().unique()
+    cliente_combo.addItems(sorted(map(str, clientes)))
+    layout.addWidget(cliente_combo)
+
+    boton_mostrar = QPushButton("Mostrar consumado")
+    boton_mostrar.clicked.connect(lambda: mostrar_consumado(cliente_combo.currentText(), df))
+    layout.addWidget(boton_mostrar)
+
+    dialog.setLayout(layout)
+    dialog.exec_()
+
+def mostrar_consumado(cliente, df):
+    ventas_cliente = df[df['CLIENTE'] == cliente].groupby('CLIENTE')['US$'].sum()
+
+    plt.figure(figsize=(8, 6))
+    ax = ventas_cliente.plot(kind='bar', color='skyblue', edgecolor='black')
+    ax.set_title(f'Ventas Totales de {cliente}', fontsize=16, fontweight='bold')
+    ax.set_xlabel('Cliente', fontsize=12)
+    ax.set_ylabel('Total Ventas en US$', fontsize=12)
+    ax.grid(axis='y', linestyle='--', alpha=0.7)
+
+    for container in ax.containers:
+        ax.bar_label(container, label_type='edge', fontsize=10)
+
+    plt.tight_layout()
+    plt.show()
+
+def ver_todas_las_ventas():
+    from data import cargar_datos_rem_nal
+    df = cargar_datos_rem_nal()
+    app = QApplication([])
+
+    dialog = QDialog()
+    dialog.setWindowTitle('Ver todas las ventas')
+
+    layout = QVBoxLayout()
+
+    fecha_inicio_label = QLabel("Selecciona la fecha de inicio:")
+    layout.addWidget(fecha_inicio_label)
+
+    fecha_inicio_edit = QDateEdit(calendarPopup=True)
+    fecha_inicio_edit.setDate(QDate.currentDate())
+    layout.addWidget(fecha_inicio_edit)
+
+    fecha_fin_label = QLabel("Selecciona la fecha de fin:")
+    layout.addWidget(fecha_fin_label)
+
+    fecha_fin_edit = QDateEdit(calendarPopup=True)
+    fecha_fin_edit.setDate(QDate.currentDate())
+    layout.addWidget(fecha_fin_edit)
+
+    boton_generar = QPushButton("Generar gráfico")
+    boton_generar.clicked.connect(lambda: mostrar_ventas_periodo(
+        fecha_inicio_edit.date().toPyDate(),
+        fecha_fin_edit.date().toPyDate(),
+        df
+    ))
+    layout.addWidget(boton_generar)
+
+    dialog.setLayout(layout)
+    dialog.exec_()
+
+def mostrar_ventas_periodo(fecha_inicio, fecha_fin, df):
+    df['FECHA'] = pd.to_datetime(df['FECHA'])
+    fecha_inicio = pd.to_datetime(fecha_inicio)
+    fecha_fin = pd.to_datetime(fecha_fin)
+
+    df_filtrado = df[(df['FECHA'] >= fecha_inicio) & (df['FECHA'] <= fecha_fin)]
+    ventas_por_cliente = df_filtrado.groupby('CLIENTE')['US$'].sum()
+
+    plt.figure(figsize=(12, 8))
+    ax = ventas_por_cliente.plot(kind='bar', color='lightgreen', edgecolor='black')
+    ax.set_title(f'Ventas entre {fecha_inicio.date()} y {fecha_fin.date()}', fontsize=16, fontweight='bold')
+    ax.set_xlabel('Cliente', fontsize=12)
+    ax.set_ylabel('Total Ventas en US$', fontsize=12)
+    ax.tick_params(axis='x', rotation=45, labelsize=10)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.grid(axis='y', linestyle='--', alpha=0.7)
+
+    for container in ax.containers:
+        ax.bar_label(container, label_type='edge', fontsize=10)
+
+    plt.tight_layout()
+    plt.show()
+
+def ver_devoluciones_por_empresa():
+    from data import cargar_datos_rem_nal
+    df = cargar_datos_rem_nal()
+    app = QApplication([])
+
+    dialog = QDialog()
+    dialog.setWindowTitle('Ver devoluciones por empresa')
+
+    layout = QVBoxLayout()
+
+    cliente_label = QLabel("Selecciona la empresa:")
+    layout.addWidget(cliente_label)
+
+    cliente_combo = QComboBox()
+    clientes = df['CLIENTE'].dropna().unique()
+    cliente_combo.addItems(sorted(map(str, clientes)))
+    layout.addWidget(cliente_combo)
+
+    boton_mostrar = QPushButton("Mostrar devoluciones")
+    boton_mostrar.clicked.connect(lambda: mostrar_devoluciones(cliente_combo.currentText(), df))
+    layout.addWidget(boton_mostrar)
+
+    dialog.setLayout(layout)
+    dialog.exec_()
+
+def mostrar_devoluciones(cliente, df):
+    devoluciones_cliente = df[df['CLIENTE'] == cliente][['FECHA', 'DEVOLUCION US$']].dropna()
+
+    if devoluciones_cliente.empty:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText(f"La empresa {cliente} no tiene devoluciones registradas.")
+        msg.setWindowTitle("Sin Devoluciones")
+        msg.exec_()
+    else:
+        plt.figure(figsize=(12, 8))
+        ax = devoluciones_cliente.set_index('FECHA')['DEVOLUCION US$'].plot(kind='bar', color='orange', edgecolor='black')
+        ax.set_title(f'Devoluciones de {cliente}', fontsize=16, fontweight='bold')
+        ax.set_xlabel('Fecha', fontsize=12)
+        ax.set_ylabel('Total Devoluciones en US$', fontsize=12)
+        ax.tick_params(axis='x', rotation=45, labelsize=10)
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.grid(axis='y', linestyle='--', alpha=0.7)
+
         for container in ax.containers:
             ax.bar_label(container, label_type='edge', fontsize=10)
 
