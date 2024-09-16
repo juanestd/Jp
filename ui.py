@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QPushButton, QMenuBar, QAction, QMenu, QLabel, QStackedWidget
+    QMainWindow, QWidget, QVBoxLayout, QPushButton, QMenuBar, QAction, QMenu, QLabel, QStackedWidget, QHBoxLayout, QFrame
 )
-from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QIcon, QPalette, QColor, QPixmap
+from PyQt5.QtCore import Qt, QSize
 from charts import (
     mostrar_graficas_consumado, mostrar_deudas_por_empresa, 
     consultar_creditos_por_empresa, filtrar_y_graficar,
@@ -14,57 +14,76 @@ class VentanaPrincipal(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("JP FLOWERS - MENÚ PRINCIPAL")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 900, 600)
         self.initUI()
 
     def initUI(self):
+        # Central widget
         widget = QWidget()
         self.setCentralWidget(widget)
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
+        widget.setLayout(layout)
 
-        # Cambiar el fondo de la ventana
-        palette = self.palette()
-        palette.setColor(QPalette.Window, QColor(30, 30, 30))  # Fondo oscuro
-        self.setPalette(palette)
+        # Menu lateral
+        self.menu_lateral = QWidget()
+        self.menu_lateral.setFixedWidth(200)
+        self.menu_lateral.setStyleSheet("""
+            background-color: #2e2e2e;
+            color: white;
+        """)
+        menu_layout = QVBoxLayout()
+        
+        boton_inicio = self.crear_boton_menu("Inicio", "icons/home_icon.png")
+        boton_inicio.clicked.connect(self.mostrar_pantalla_principal)
+        menu_layout.addWidget(boton_inicio)
 
-        menu_bar = QMenuBar()
-        self.setMenuBar(menu_bar)
-        menu = QMenu("Opciones", self)
-        menu_bar.addMenu(menu)
+        boton_cxc = self.crear_boton_menu("Clientes Internacionales (CXC)", "icons/monitor_icon.png")
+        boton_cxc.clicked.connect(self.abrir_modulo_cxc)
+        menu_layout.addWidget(boton_cxc)
 
-        action_salir = QAction("Salir", self)
-        action_salir.triggered.connect(self.close)
-        menu.addAction(action_salir)
+        boton_rem_nal = self.crear_boton_menu("Clientes Nacionales (REM NAL)", "icons/database_icon.png")
+        boton_rem_nal.clicked.connect(self.abrir_modulo_rem_nal)
+        menu_layout.addWidget(boton_rem_nal)
 
+        boton_facturas_nal = self.crear_boton_menu("Facturación Nacional", "icons/invoice_icon.png")
+        boton_facturas_nal.clicked.connect(self.abrir_modulo_facturas_nal)
+        menu_layout.addWidget(boton_facturas_nal)
+
+        boton_creditos_reclamos = self.crear_boton_menu("Créditos y Reclamos", "icons/gear_icon.png")
+        boton_creditos_reclamos.clicked.connect(self.abrir_modulo_creditos_reclamos)
+        menu_layout.addWidget(boton_creditos_reclamos)
+
+        self.menu_lateral.setLayout(menu_layout)
+        layout.addWidget(self.menu_lateral)
+
+        # Stacked Widget
         self.stacked_widget = QStackedWidget()
         layout.addWidget(self.stacked_widget)
 
+        # Pantalla principal
         self.pantalla_principal = QWidget()
-        pantalla_layout = QVBoxLayout()
-
-        # Botones con estilo personalizado
-        boton_cxc = self.crear_boton_con_icono("Clientes Internacionales (CXC)", "icons/monitor_icon.png")
-        boton_cxc.clicked.connect(self.abrir_modulo_cxc)
-        pantalla_layout.addWidget(boton_cxc)
-
-        boton_rem_nal = self.crear_boton_con_icono("Clientes Nacionales (REM NAL)", "icons/database_icon.png")
-        boton_rem_nal.clicked.connect(self.abrir_modulo_rem_nal)
-        pantalla_layout.addWidget(boton_rem_nal)
-
-        boton_facturas_nal = self.crear_boton_con_icono("Facturación Nacional", "icons/invoice_icon.png")
-        boton_facturas_nal.clicked.connect(self.abrir_modulo_facturas_nal)
-        pantalla_layout.addWidget(boton_facturas_nal)
-
-        boton_creditos_reclamos = self.crear_boton_con_icono("Créditos y Reclamos", "icons/gear_icon.png")
-        boton_creditos_reclamos.clicked.connect(self.abrir_modulo_creditos_reclamos)
-        pantalla_layout.addWidget(boton_creditos_reclamos)
-
-        self.pantalla_principal.setLayout(pantalla_layout)
         self.stacked_widget.addWidget(self.pantalla_principal)
+        self.mostrar_pantalla_principal()
 
-        widget.setLayout(layout)
+    def crear_boton_menu(self, texto, icono):
+        boton = QPushButton(texto)
+        boton.setIcon(QIcon(icono))
+        boton.setIconSize(QSize(24, 24))
+        boton.setFont(QFont('Arial', 12))
+        boton.setStyleSheet("""
+            QPushButton {
+                background-color: #4a4a4a;
+                color: white;
+                border: none;
+                padding: 10px;
+                text-align: left;
+            }
+            QPushButton:hover {
+                background-color: #666666;
+            }
+        """)
+        return boton
 
-    # Función para crear botones con iconos y estilo personalizado
     def crear_boton_con_icono(self, texto, icono):
         boton = QPushButton(texto)
         boton.setFont(QFont('Arial', 12))
@@ -83,34 +102,38 @@ class VentanaPrincipal(QMainWindow):
         """)
         return boton
 
-    # Funciones para cambiar de módulo sin abrir nuevas ventanas
+    def mostrar_pantalla_principal(self):
+        layout = QVBoxLayout()
+        etiqueta = QLabel("Bienvenido al menú principal")
+        etiqueta.setStyleSheet("color: white; font-size: 18px;")
+        layout.addWidget(etiqueta)
+
+        self.pantalla_principal.setLayout(layout)
+
     def abrir_modulo_cxc(self):
-        self.modulo_cxc = VentanaCXC(self.stacked_widget)
-        self.stacked_widget.addWidget(self.modulo_cxc)
-        self.stacked_widget.setCurrentWidget(self.modulo_cxc)
+        self.cambiar_modulo(VentanaCXC(self.stacked_widget))
 
     def abrir_modulo_rem_nal(self):
-        self.modulo_rem_nal = VentanaREMNAL(self.stacked_widget)
-        self.stacked_widget.addWidget(self.modulo_rem_nal)
-        self.stacked_widget.setCurrentWidget(self.modulo_rem_nal)
+        self.cambiar_modulo(VentanaREMNAL(self.stacked_widget))
 
     def abrir_modulo_facturas_nal(self):
-        self.modulo_facturas_nal = VentanaFacturasNAL(self.stacked_widget)
-        self.stacked_widget.addWidget(self.modulo_facturas_nal)
-        self.stacked_widget.setCurrentWidget(self.modulo_facturas_nal)
+        self.cambiar_modulo(VentanaFacturasNAL(self.stacked_widget))
 
     def abrir_modulo_creditos_reclamos(self):
-        self.modulo_creditos_reclamos = VentanaCreditosReclamos(self.stacked_widget)
-        self.stacked_widget.addWidget(self.modulo_creditos_reclamos)
-        self.stacked_widget.setCurrentWidget(self.modulo_creditos_reclamos)
+        self.cambiar_modulo(VentanaCreditosReclamos(self.stacked_widget))
+
+    def cambiar_modulo(self, modulo):
+        self.stacked_widget.addWidget(modulo)
+        self.stacked_widget.setCurrentWidget(modulo)
 
 
-# Ventana para Clientes Internacionales (CXC)
 class VentanaCXC(QWidget):
     def __init__(self, stacked_widget):
         super().__init__()
         self.stacked_widget = stacked_widget
+        self.initUI()
 
+    def initUI(self):
         layout = QVBoxLayout()
 
         boton_grafica_consumado = self.crear_boton_con_icono("Mostrar Ventas por Cliente", "icons/chart_icon.png")
@@ -135,7 +158,6 @@ class VentanaCXC(QWidget):
 
         self.setLayout(layout)
 
-    # Función para crear botones con iconos y estilo personalizado
     def crear_boton_con_icono(self, texto, icono):
         boton = QPushButton(texto)
         boton.setFont(QFont('Arial', 12))
@@ -158,12 +180,13 @@ class VentanaCXC(QWidget):
         self.stacked_widget.setCurrentIndex(0)
 
 
-# Ventana para Clientes Nacionales (REM NAL)
 class VentanaREMNAL(QWidget):
     def __init__(self, stacked_widget):
         super().__init__()
         self.stacked_widget = stacked_widget
+        self.initUI()
 
+    def initUI(self):
         layout = QVBoxLayout()
 
         boton_consumado_cliente = self.crear_boton_con_icono("Ver consumado de ventas por cliente", "icons/chart_icon.png")
@@ -206,12 +229,13 @@ class VentanaREMNAL(QWidget):
         self.stacked_widget.setCurrentIndex(0)
 
 
-# Ventana para Facturación Nacional (FACTURAS NAL)
 class VentanaFacturasNAL(QWidget):
     def __init__(self, stacked_widget):
         super().__init__()
         self.stacked_widget = stacked_widget
+        self.initUI()
 
+    def initUI(self):
         layout = QVBoxLayout()
         layout.addWidget(QLabel("Esta es la ventana para Facturación Nacional"))
 
@@ -243,12 +267,13 @@ class VentanaFacturasNAL(QWidget):
         self.stacked_widget.setCurrentIndex(0)
 
 
-# Ventana para Créditos y Reclamos
 class VentanaCreditosReclamos(QWidget):
     def __init__(self, stacked_widget):
         super().__init__()
         self.stacked_widget = stacked_widget
+        self.initUI()
 
+    def initUI(self):
         layout = QVBoxLayout()
         layout.addWidget(QLabel("Esta es la ventana para Créditos y Reclamos"))
 
