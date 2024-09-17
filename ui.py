@@ -19,13 +19,11 @@ class VentanaPrincipal(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        # Central widget
         widget = QWidget()
         self.setCentralWidget(widget)
         layout = QHBoxLayout()
         widget.setLayout(layout)
 
-        # Menu lateral
         self.menu_lateral = QWidget()
         self.menu_lateral.setFixedWidth(200)
         self.menu_lateral.setStyleSheet("""
@@ -49,11 +47,9 @@ class VentanaPrincipal(QMainWindow):
         self.menu_lateral.setLayout(menu_layout)
         layout.addWidget(self.menu_lateral)
 
-        # Stacked Widget
         self.stacked_widget = QStackedWidget()
         layout.addWidget(self.stacked_widget)
 
-        # Pantalla principal
         self.pantalla_principal = QWidget()
         self.stacked_widget.addWidget(self.pantalla_principal)
         self.mostrar_pantalla_principal()
@@ -71,7 +67,6 @@ class VentanaPrincipal(QMainWindow):
                 padding: 10px;
                 text-align: left;
                 border-radius: 8px;
-                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
             }
             QPushButton:hover {
                 background-color: #66bb66;
@@ -101,7 +96,6 @@ class VentanaPrincipal(QMainWindow):
         return boton
 
     def mostrar_pantalla_principal(self):
-        # Crear el contenido para la pantalla principal
         layout = QVBoxLayout()
         etiqueta = QLabel("Bienvenido al menú principal")
         etiqueta.setFont(QFont('Arial', 16))
@@ -109,7 +103,7 @@ class VentanaPrincipal(QMainWindow):
         layout.addWidget(etiqueta)
 
         self.pantalla_principal.setLayout(layout)
-        self.stacked_widget.setCurrentWidget(self.pantalla_principal)  # Mostrar la pantalla principal
+        self.stacked_widget.setCurrentWidget(self.pantalla_principal)
 
     def abrir_modulo_cxc(self):
         self.cambiar_modulo(VentanaCXC(self.stacked_widget))
@@ -144,7 +138,7 @@ class VentanaCXC(QWidget):
         layout.addWidget(boton_consultar_creditos)
 
         boton_filtrar_graficar = self.crear_boton_con_icono("Filtrar y Graficar Ventas por Cliente", "icons/filter_icon.png")
-        boton_filtrar_graficar.clicked.connect(self.abrir_dialogo_filtrar_graficar)
+        boton_filtrar_graficar.clicked.connect(consultar_creditos_por_empresa)
         layout.addWidget(boton_filtrar_graficar)
 
         self.setLayout(layout)
@@ -167,47 +161,6 @@ class VentanaCXC(QWidget):
             }
         """)
         return boton
-
-    def abrir_dialogo_filtrar_graficar(self):
-        self.dialogo = QDialog(self)
-        self.dialogo.setWindowTitle('Filtrar y Graficar Ventas por Cliente')
-
-        layout = QVBoxLayout()
-
-        cliente_label = QLabel("Selecciona el cliente:")
-        layout.addWidget(cliente_label)
-
-        cliente_combo = QComboBox()
-        from data import cargar_datos_cxc
-        df = cargar_datos_cxc()
-        clientes = df['CUSTOMER'].dropna().unique()
-        cliente_combo.addItems(sorted(map(str, clientes)))
-        layout.addWidget(cliente_combo)
-
-        fecha_inicio_label = QLabel("Selecciona la fecha de inicio:")
-        layout.addWidget(fecha_inicio_label)
-
-        fecha_inicio_edit = QDateEdit(calendarPopup=True)
-        fecha_inicio_edit.setDate(QDate.currentDate())
-        layout.addWidget(fecha_inicio_edit)
-
-        fecha_fin_label = QLabel("Selecciona la fecha de fin:")
-        layout.addWidget(fecha_fin_label)
-
-        fecha_fin_edit = QDateEdit(calendarPopup=True)
-        fecha_fin_edit.setDate(QDate.currentDate())
-        layout.addWidget(fecha_fin_edit)
-
-        boton_generar = QPushButton("Generar gráfico")
-        boton_generar.clicked.connect(lambda: self.procesar_filtrar_y_graficar(
-            cliente_combo.currentText(),
-            fecha_inicio_edit.date().toPyDate(),
-            fecha_fin_edit.date().toPyDate()
-        ))
-        layout.addWidget(boton_generar)
-
-        self.dialogo.setLayout(layout)
-        self.dialogo.exec()
 
     def procesar_filtrar_y_graficar(self, cliente, fecha_inicio, fecha_fin):
         try:

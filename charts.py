@@ -81,10 +81,15 @@ def consultar_creditos_por_empresa():
     layout.addWidget(fecha_fin_edit)
 
     boton_consultar = QPushButton("Consultar")
-    boton_consultar.clicked.connect(lambda: procesar_consulta(
-        empresa_combo.currentText(),
-        fecha_inicio_edit.date().toPyDate(),
-        fecha_fin_edit.date().toPyDate()
+
+    # Modificamos el clic del botón para cerrar el diálogo después de consultar
+    boton_consultar.clicked.connect(lambda: (
+        procesar_consulta(
+            empresa_combo.currentText(),
+            fecha_inicio_edit.date().toPyDate(),
+            fecha_fin_edit.date().toPyDate()
+        ),
+        dialog.accept()  # Cierra el cuadro de diálogo
     ))
     layout.addWidget(boton_consultar)
 
@@ -239,7 +244,7 @@ def ver_todas_las_ventas():
 
     dialog.setLayout(layout)
     dialog.exec_()
-
+    
 def mostrar_ventas_periodo(fecha_inicio, fecha_fin, df):
     df['FECHA'] = pd.to_datetime(df['FECHA'])
     fecha_inicio = pd.to_datetime(fecha_inicio)
