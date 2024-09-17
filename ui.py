@@ -45,13 +45,7 @@ class VentanaPrincipal(QMainWindow):
         boton_rem_nal.clicked.connect(self.abrir_modulo_rem_nal)
         menu_layout.addWidget(boton_rem_nal)
 
-        boton_facturas_nal = self.crear_boton_menu("Facturación Nacional", "icons/invoice_icon.png")
-        boton_facturas_nal.clicked.connect(self.abrir_modulo_facturas_nal)
-        menu_layout.addWidget(boton_facturas_nal)
-
-        boton_creditos_reclamos = self.crear_boton_menu("Créditos y Reclamos", "icons/gear_icon.png")
-        boton_creditos_reclamos.clicked.connect(self.abrir_modulo_creditos_reclamos)
-        menu_layout.addWidget(boton_creditos_reclamos)
+        
 
         self.menu_lateral.setLayout(menu_layout)
         layout.addWidget(self.menu_lateral)
@@ -89,18 +83,19 @@ class VentanaPrincipal(QMainWindow):
         boton.setFont(QFont('Arial', 12))
         boton.setIcon(QIcon(icono))
         boton.setStyleSheet("""
-            QPushButton {
-                background-color: #1a1a1a;
-                color: #00ffff;
-                border: 2px solid #00ffff;
-                border-radius: 10px;
-                padding: 10px;
-            }
-            QPushButton:hover {
-                background-color: #333333;
-            }
-        """)
+        QPushButton {
+            background-color: #1a1a1a;
+            color: #00ff00;  /* Cambiado a verde */
+            border: 2px solid #00ff00;  /* Borde verde */
+            border-radius: 10px;
+            padding: 10px;
+        }
+        QPushButton:hover {
+            background-color: #333333;
+        }
+    """)
         return boton
+
 
     def mostrar_pantalla_principal(self):
         layout = QVBoxLayout()
@@ -115,12 +110,6 @@ class VentanaPrincipal(QMainWindow):
 
     def abrir_modulo_rem_nal(self):
         self.cambiar_modulo(VentanaREMNAL(self.stacked_widget))
-
-    def abrir_modulo_facturas_nal(self):
-        self.cambiar_modulo(VentanaFacturasNAL(self.stacked_widget))
-
-    def abrir_modulo_creditos_reclamos(self):
-        self.cambiar_modulo(VentanaCreditosReclamos(self.stacked_widget))
 
     def cambiar_modulo(self, modulo):
         self.stacked_widget.addWidget(modulo)
@@ -152,9 +141,6 @@ class VentanaCXC(QWidget):
         boton_filtrar_graficar.clicked.connect(filtrar_y_graficar)
         layout.addWidget(boton_filtrar_graficar)
 
-        boton_regresar = self.crear_boton_con_icono("Regresar al Menú Principal", "icons/back_icon.png")
-        boton_regresar.clicked.connect(self.regresar_menu_principal)
-        layout.addWidget(boton_regresar)
 
         self.setLayout(layout)
 
@@ -165,8 +151,8 @@ class VentanaCXC(QWidget):
         boton.setStyleSheet("""
             QPushButton {
                 background-color: #1a1a1a;
-                color: #00ffff;
-                border: 2px solid #00ffff;
+                color: #00ff00;
+                border: 2px solid #00ff00;
                 border-radius: 10px;
                 padding: 10px;
             }
@@ -201,10 +187,7 @@ class VentanaREMNAL(QWidget):
         boton_devoluciones_empresa.clicked.connect(ver_devoluciones_por_empresa)
         layout.addWidget(boton_devoluciones_empresa)
 
-        boton_regresar = self.crear_boton_con_icono("Regresar al Menú Principal", "icons/back_icon.png")
-        boton_regresar.clicked.connect(self.regresar_menu_principal)
-        layout.addWidget(boton_regresar)
-
+      
         self.setLayout(layout)
 
     def crear_boton_con_icono(self, texto, icono):
@@ -214,84 +197,8 @@ class VentanaREMNAL(QWidget):
         boton.setStyleSheet("""
             QPushButton {
                 background-color: #1a1a1a;
-                color: #00ffff;
-                border: 2px solid #00ffff;
-                border-radius: 10px;
-                padding: 10px;
-            }
-            QPushButton:hover {
-                background-color: #333333;
-            }
-        """)
-        return boton
-
-    def regresar_menu_principal(self):
-        self.stacked_widget.setCurrentIndex(0)
-
-
-class VentanaFacturasNAL(QWidget):
-    def __init__(self, stacked_widget):
-        super().__init__()
-        self.stacked_widget = stacked_widget
-        self.initUI()
-
-    def initUI(self):
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel("Esta es la ventana para Facturación Nacional"))
-
-        boton_regresar = self.crear_boton_con_icono("Regresar al Menú Principal", "icons/back_icon.png")
-        boton_regresar.clicked.connect(self.regresar_menu_principal)
-        layout.addWidget(boton_regresar)
-
-        self.setLayout(layout)
-
-    def crear_boton_con_icono(self, texto, icono):
-        boton = QPushButton(texto)
-        boton.setFont(QFont('Arial', 12))
-        boton.setIcon(QIcon(icono))
-        boton.setStyleSheet("""
-            QPushButton {
-                background-color: #1a1a1a;
-                color: #00ffff;
-                border: 2px solid #00ffff;
-                border-radius: 10px;
-                padding: 10px;
-            }
-            QPushButton:hover {
-                background-color: #333333;
-            }
-        """)
-        return boton
-
-    def regresar_menu_principal(self):
-        self.stacked_widget.setCurrentIndex(0)
-
-
-class VentanaCreditosReclamos(QWidget):
-    def __init__(self, stacked_widget):
-        super().__init__()
-        self.stacked_widget = stacked_widget
-        self.initUI()
-
-    def initUI(self):
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel("Esta es la ventana para Créditos y Reclamos"))
-
-        boton_regresar = self.crear_boton_con_icono("Regresar al Menú Principal", "icons/back_icon.png")
-        boton_regresar.clicked.connect(self.regresar_menu_principal)
-        layout.addWidget(boton_regresar)
-
-        self.setLayout(layout)
-
-    def crear_boton_con_icono(self, texto, icono):
-        boton = QPushButton(texto)
-        boton.setFont(QFont('Arial', 12))
-        boton.setIcon(QIcon(icono))
-        boton.setStyleSheet("""
-            QPushButton {
-                background-color: #1a1a1a;
-                color: #00ffff;
-                border: 2px solid #00ffff;
+                color: #00ff00;
+                border: 2px solid #00ff00;
                 border-radius: 10px;
                 padding: 10px;
             }
