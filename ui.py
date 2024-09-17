@@ -169,8 +169,8 @@ class VentanaCXC(QWidget):
         return boton
 
     def abrir_dialogo_filtrar_graficar(self):
-        dialogo = QDialog(self)
-        dialogo.setWindowTitle('Filtrar y Graficar Ventas por Cliente')
+        self.dialogo = QDialog(self)
+        self.dialogo.setWindowTitle('Filtrar y Graficar Ventas por Cliente')
 
         layout = QVBoxLayout()
 
@@ -206,8 +206,8 @@ class VentanaCXC(QWidget):
         ))
         layout.addWidget(boton_generar)
 
-        dialogo.setLayout(layout)
-        dialogo.exec_()
+        self.dialogo.setLayout(layout)
+        self.dialogo.exec()
 
     def procesar_filtrar_y_graficar(self, cliente, fecha_inicio, fecha_fin):
         try:
@@ -217,7 +217,9 @@ class VentanaCXC(QWidget):
             msg.setIcon(QMessageBox.Critical)
             msg.setText(f"Error al filtrar y graficar: {str(e)}")
             msg.setWindowTitle("Error")
-            msg.exec_()
+            msg.exec()
+        finally:
+            self.dialogo.accept()  # Cierra el diálogo
 
     def regresar_menu_principal(self):
         self.stacked_widget.setCurrentIndex(0)
@@ -233,7 +235,7 @@ class VentanaREMNAL(QWidget):
         layout = QVBoxLayout()
 
         boton_consumado_cliente = self.crear_boton_con_icono("Ver consumado de ventas por cliente", "icons/chart_icon.png")
-        boton_consumado_cliente.clicked.connect(ver_consumado_por_cliente)
+        boton_consumado_cliente.clicked.connect(self.abrir_dialogo_consumado_cliente)
         layout.addWidget(boton_consumado_cliente)
 
         boton_todas_ventas = self.crear_boton_con_icono("Ver todas las ventas", "icons/sales_icon.png")
@@ -264,6 +266,59 @@ class VentanaREMNAL(QWidget):
             }
         """)
         return boton
+
+    def abrir_dialogo_consumado_cliente(self):
+        self.dialogo = QDialog(self)
+        self.dialogo.setWindowTitle('Ver consumado de ventas por cliente')
+
+        layout = QVBoxLayout()
+
+        cliente_label = QLabel("Selecciona el cliente:")
+        layout.addWidget(cliente_label)
+
+        cliente_combo = QComboBox()
+        from data import cargar_datos_cxc
+        df = cargar_datos_cxc()
+        clientes = df['CUSTOMER'].dropna().unique()
+        cliente_combo.addItems(sorted(map(str, clientes)))
+        layout.addWidget(cliente_combo)
+
+        fecha_inicio_label = QLabel("Selecciona la fecha de inicio:")
+        layout.addWidget(fecha_inicio_label)
+
+        fecha_inicio_edit = QDateEdit(calendarPopup=True)
+        fecha_inicio_edit.setDate(QDate.currentDate())
+        layout.addWidget(fecha_inicio_edit)
+
+        fecha_fin_label = QLabel("Selecciona la fecha de fin:")
+        layout.addWidget(fecha_fin_label)
+
+        fecha_fin_edit = QDateEdit(calendarPopup=True)
+        fecha_fin_edit.setDate(QDate.currentDate())
+        layout.addWidget(fecha_fin_edit)
+
+        boton_generar = QPushButton("Generar gráfico")
+        boton_generar.clicked.connect(lambda: self.procesar_ver_consumado_por_cliente(
+            cliente_combo.currentText(),
+            fecha_inicio_edit.date().toPyDate(),
+            fecha_fin_edit.date().toPyDate()
+        ))
+        layout.addWidget(boton_generar)
+
+        self.dialogo.setLayout(layout)
+        self.dialogo.exec()
+
+    def procesar_ver_consumado_por_cliente(self, cliente, fecha_inicio, fecha_fin):
+        try:
+            ver_consumado_por_cliente(cliente, fecha_inicio, fecha_fin)
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText(f"Error al consultar consumado por cliente: {str(e)}")
+            msg.setWindowTitle("Error")
+            msg.exec()
+        finally:
+            self.dialogo.accept()  # Cierra el diálogo
 
     def regresar_menu_principal(self):
         self.stacked_widget.setCurrentIndex(0)
