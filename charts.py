@@ -162,8 +162,9 @@ def filtrar_y_graficar(cliente, fecha_inicio, fecha_fin):
 
         plt.tight_layout()
         plt.show()
+
         
-def ver_consumado_por_cliente():
+def ver_consumado_por_cliente():  # Función restaurada
     from data import cargar_datos_rem_nal
     df = cargar_datos_rem_nal()
     app = QApplication([])
