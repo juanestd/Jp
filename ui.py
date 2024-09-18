@@ -2,8 +2,8 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QStackedWidget,
     QDialog, QComboBox, QDateEdit, QMessageBox
 )
-from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtCore import QSize, QDate
+from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtCore import QSize, QDate, Qt
 from charts import (
     mostrar_graficas_consumado, mostrar_deudas_por_empresa, 
     consultar_creditos_por_empresa, filtrar_y_graficar,
@@ -44,6 +44,9 @@ class VentanaPrincipal(QMainWindow):
         boton_rem_nal.clicked.connect(self.abrir_modulo_rem_nal)
         menu_layout.addWidget(boton_rem_nal)
 
+        # Eliminar ajustes y ayuda
+        # Aquí se eliminan los botones que ya no se necesitan
+
         self.menu_lateral.setLayout(menu_layout)
         layout.addWidget(self.menu_lateral)
 
@@ -76,7 +79,62 @@ class VentanaPrincipal(QMainWindow):
         """)
         return boton
 
-    def crear_boton_con_icono(self, texto, icono):
+    def mostrar_pantalla_principal(self):
+        layout = QVBoxLayout()
+
+        # Crear una etiqueta para mostrar la imagen
+        imagen = QLabel(self)
+        pixmap = QPixmap('descarga.jpeg')  # Ruta de la imagen
+        imagen.setPixmap(pixmap)
+        imagen.setAlignment(Qt.AlignCenter)  # Alinear la imagen al centro
+        imagen.setFixedSize(300, 300)  # Ajustar el tamaño de la imagen (puedes cambiarlo)
+
+        # Crear una etiqueta para el texto de bienvenida
+        etiqueta_bienvenida = QLabel("✨ Bienvenidos al sistema de análisis de datos de JP FLOWERS ✨", self)
+        etiqueta_bienvenida.setFont(QFont('Arial', 28, QFont.Bold))
+        etiqueta_bienvenida.setStyleSheet("""
+            QLabel {
+                color: #ffffff;
+                background-color: #2e8b57;
+                border: 2px solid #ffffff;
+                border-radius: 15px;
+                padding: 15px 30px;
+                font-size: 28px;
+                font-family: 'Arial';
+                text-shadow: 1px 1px 3px #000000;
+            }
+        """)
+        etiqueta_bienvenida.setAlignment(Qt.AlignCenter)
+
+        # Mejorar la estética general con más espacio y un fondo elegante
+        self.pantalla_principal.setStyleSheet("""
+            QWidget {
+                background-color: #1c1c1c;
+            }
+        """)
+
+        # Añadir la imagen y el texto al layout
+        layout.addSpacing(50)  # Espacio superior
+        layout.addWidget(imagen)
+        layout.addSpacing(20)  # Espacio entre la imagen y el texto
+        layout.addWidget(etiqueta_bienvenida)
+        layout.addSpacing(50)  # Espacio inferior
+
+        self.pantalla_principal.setLayout(layout)
+        self.stacked_widget.setCurrentWidget(self.pantalla_principal)
+
+    def abrir_modulo_cxc(self):
+        self.cambiar_modulo(VentanaCXC(self.stacked_widget))
+
+    def abrir_modulo_rem_nal(self):
+        self.cambiar_modulo(VentanaREMNAL(self.stacked_widget))
+
+    def cambiar_modulo(self, modulo):
+        self.stacked_widget.addWidget(modulo)
+        self.stacked_widget.setCurrentWidget(modulo)
+
+
+def crear_boton_con_icono(self, texto, icono):
         boton = QPushButton(texto)
         boton.setFont(QFont('Arial', 12))
         boton.setIcon(QIcon(icono))
@@ -94,27 +152,6 @@ class VentanaPrincipal(QMainWindow):
             }
         """)
         return boton
-
-    def mostrar_pantalla_principal(self):
-        layout = QVBoxLayout()
-        etiqueta = QLabel("Bienvenido al menú principal")
-        etiqueta.setFont(QFont('Arial', 16))
-        etiqueta.setStyleSheet("color: white; font-size: 18px;")
-        layout.addWidget(etiqueta)
-
-        self.pantalla_principal.setLayout(layout)
-        self.stacked_widget.setCurrentWidget(self.pantalla_principal)
-
-    def abrir_modulo_cxc(self):
-        self.cambiar_modulo(VentanaCXC(self.stacked_widget))
-
-    def abrir_modulo_rem_nal(self):
-        self.cambiar_modulo(VentanaREMNAL(self.stacked_widget))
-
-    def cambiar_modulo(self, modulo):
-        self.stacked_widget.addWidget(modulo)
-        self.stacked_widget.setCurrentWidget(modulo)
-
 
 class VentanaCXC(QWidget):
     def __init__(self, stacked_widget):
