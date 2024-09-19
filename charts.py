@@ -112,28 +112,33 @@ def filtrar_y_graficar(cliente, fecha_inicio, fecha_fin):
         ventas_por_fecha = df_filtrado.groupby('DATE')['TOTAL US$'].sum()
         estilo_grafico(ventas_por_fecha, f'Ventas de {cliente} ({fecha_inicio.date()} a {fecha_fin.date()})', 'Fecha', 'Total Ventas en US$')
 
-def ver_consumado_por_cliente():
+def ver_consumado_por_cliente(cliente, fecha_inicio, fecha_fin):
     from data import cargar_datos_rem_nal
     df = cargar_datos_rem_nal()
-    dialog = QDialog()
-    dialog.setWindowTitle('Ver consumado de ventas por cliente')
-    layout = QVBoxLayout()
-    cliente_label = QLabel("Selecciona el cliente:")
-    layout.addWidget(cliente_label)
-    cliente_combo = QComboBox()
-    clientes = df['CLIENTE'].dropna().unique()
-    cliente_combo.addItems(sorted(map(str, clientes)))
-    layout.addWidget(cliente_combo)
-    boton_mostrar = QPushButton("Mostrar consumado")
-    boton_mostrar.clicked.connect(lambda: mostrar_consumado(cliente_combo.currentText(), df))
-    layout.addWidget(boton_mostrar)
-    dialog.setLayout(layout)
-    dialog.exec_()
 
+    # Convertir la columna de fechas a tipo 'date' para hacer la comparación
+    df['FECHA'] = df['FECHA'].dt.date
+
+    # Filtrar los datos por cliente y rango de fechas
+    df_filtrado = df[(df['CLIENTE'] == cliente) & 
+                     (df['FECHA'] >= fecha_inicio) & 
+                     (df['FECHA'] <= fecha_fin)]
+
+    if df_filtrado.empty:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText(f"No se encontraron ventas para {cliente} en el rango de fechas proporcionado.")
+        msg.setWindowTitle("Sin datos")
+        msg.exec_()
+    else:
+        # Agrupar y sumar ventas por cliente
+        ventas_cliente = df_filtrado.groupby('CLIENTE')['US$'].sum()
+        estilo_grafico(ventas_cliente, f'Ventas Totales de {cliente} desde {fecha_inicio} hasta {fecha_fin}', 
+                       'Cliente', 'Total Ventas en US$')
+# Función auxiliar para mostrar el gráfico de ventas
 def mostrar_consumado(cliente, df):
     ventas_cliente = df[df['CLIENTE'] == cliente].groupby('CLIENTE')['US$'].sum()
     estilo_grafico(ventas_cliente, f'Ventas Totales de {cliente}', 'Cliente', 'Total Ventas en US$')
-
 def ver_todas_las_ventas():
     from data import cargar_datos_rem_nal
     df = cargar_datos_rem_nal()
@@ -154,19 +159,22 @@ def ver_todas_las_ventas():
     boton_generar.clicked.connect(lambda: mostrar_ventas_periodo(
         fecha_inicio_edit.date().toPyDate(),
         fecha_fin_edit.date().toPyDate(),
-        df
+        df,
+        dialog
     ))
     layout.addWidget(boton_generar)
     dialog.setLayout(layout)
     dialog.exec_()
 
-def mostrar_ventas_periodo(fecha_inicio, fecha_fin, df):
+def mostrar_ventas_periodo(fecha_inicio, fecha_fin, df, dialog):
     df['FECHA'] = pd.to_datetime(df['FECHA'])
     fecha_inicio = pd.to_datetime(fecha_inicio)
     fecha_fin = pd.to_datetime(fecha_fin)
     df_filtrado = df[(df['FECHA'] >= fecha_inicio) & (df['FECHA'] <= fecha_fin)]
     ventas_por_cliente = df_filtrado.groupby('CLIENTE')['US$'].sum()
     estilo_grafico(ventas_por_cliente, f'Ventas entre {fecha_inicio.date()} y {fecha_fin.date()}', 'Cliente', 'Total Ventas en US$')
+    dialog.accept()  # Cierra el diálogo después de generar el gráfico
+
 
 def ver_devoluciones_por_empresa():
     from data import cargar_datos_rem_nal
