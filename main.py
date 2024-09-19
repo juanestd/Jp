@@ -1,20 +1,20 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
-from ui import VentanaPrincipal  # Asegúrate de que este import sea correcto
+from ui import VentanaPrincipal, resource_path  
 
 def main():
     try:
         app = QApplication(sys.argv)
-        ventana = VentanaPrincipal()  # Inicializar la ventana
+        ventana = VentanaPrincipal()
         
         # Establecer el icono de la ventana
-        ventana.setWindowIcon(QIcon('descarga.jpeg'))  # Ruta a tu imagen
+        ventana.setWindowIcon(QIcon(resource_path('descarga.jpeg')))  # Ruta a tu imagen
         
-        ventana.show()  # Mostrar la ventana principal
-        sys.exit(app.exec())  # Iniciar el ciclo de eventos
+        ventana.show()
+        sys.exit(app.exec())
     except Exception as e:
-        print(f"Error: {e}")  # Captura cualquier error y lo muestra en la consola
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,5 @@
+import os
+import sys
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QStackedWidget,
     QDialog, QComboBox, QDateEdit, QMessageBox
@@ -9,6 +11,12 @@ from charts import (
     consultar_creditos_por_empresa, filtrar_y_graficar,
     ver_consumado_por_cliente, ver_todas_las_ventas, ver_devoluciones_por_empresa
 )
+
+def resource_path(relative_path):
+    """Obtiene la ruta de los recursos."""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
@@ -26,10 +34,7 @@ class VentanaPrincipal(QMainWindow):
 
         self.menu_lateral = QWidget()
         self.menu_lateral.setFixedWidth(200)
-        self.menu_lateral.setStyleSheet("""
-            background-color: #2e2e2e;
-            color: white;
-        """)
+        self.menu_lateral.setStyleSheet("""background-color: #2e2e2e; color: white;""")
         menu_layout = QVBoxLayout()
 
         boton_inicio = self.crear_boton_menu("Inicio", "icons/home_icon.png")
@@ -43,9 +48,6 @@ class VentanaPrincipal(QMainWindow):
         boton_rem_nal = self.crear_boton_menu("Clientes Nacionales (REM NAL)", "icons/database_icon.png")
         boton_rem_nal.clicked.connect(self.abrir_modulo_rem_nal)
         menu_layout.addWidget(boton_rem_nal)
-
-        # Eliminar ajustes y ayuda
-        # Aquí se eliminan los botones que ya no se necesitan
 
         self.menu_lateral.setLayout(menu_layout)
         layout.addWidget(self.menu_lateral)
@@ -62,21 +64,12 @@ class VentanaPrincipal(QMainWindow):
         boton.setIcon(QIcon(icono))
         boton.setIconSize(QSize(24, 24))
         boton.setFont(QFont('Arial', 12))
-        boton.setStyleSheet("""
-            QPushButton {
-                background-color: #4a4a4a;
-                color: white;
-                border: 1px solid #007f00;
-                padding: 10px;
-                text-align: left;
-                border-radius: 8px;
-            }
-            QPushButton:hover {
-                background-color: #66bb66;
-                color: white;
-                border: 1px solid #00cc00;
-            }
-        """)
+        boton.setStyleSheet("""QPushButton {
+            background-color: #4a4a4a; color: white; border: 1px solid #007f00;
+            padding: 10px; text-align: left; border-radius: 8px;
+        } QPushButton:hover {
+            background-color: #66bb66; color: white; border: 1px solid #00cc00;
+        }""")
         return boton
 
     def mostrar_pantalla_principal(self):
@@ -84,40 +77,32 @@ class VentanaPrincipal(QMainWindow):
 
         # Crear una etiqueta para mostrar la imagen de fondo
         imagen = QLabel(self)
-        pixmap = QPixmap('descarga.jpeg')  # Ruta de la imagen
+        pixmap = QPixmap(resource_path('descarga.jpeg'))  # Ruta de la imagen
         imagen.setPixmap(pixmap)
 
         # Establecer tamaño adecuado para la imagen
-        imagen.setFixedSize(500, 300)  # Cambia estos valores si prefieres otro tamaño
-        imagen.setAlignment(Qt.AlignCenter)  # Centrar la imagen
+        imagen.setFixedSize(500, 300)
+        imagen.setAlignment(Qt.AlignCenter)
 
         # Crear una etiqueta para el texto de bienvenida
         etiqueta_bienvenida = QLabel(" Bienvenidos al sistema de análisis de datos de JP FLOWERS ", self)
         etiqueta_bienvenida.setFont(QFont('Arial', 24, QFont.Bold))
-        etiqueta_bienvenida.setStyleSheet("""
-            QLabel {
-                color: #ffffff;
-                background-color: rgba(46, 139, 87, 204);  /* Fondo semitransparente */
-                border: 2px solid #ffffff;
-                border-radius: 15px;
-                padding: 10px 20px;
-                font-size: 24px;
-                font-family: 'Arial';
-                text-shadow: 1px 1px 3px #000000;
-            }
-        """)
+        etiqueta_bienvenida.setStyleSheet("""QLabel {
+            color: #ffffff; background-color: rgba(46, 139, 87, 204);
+            border: 2px solid #ffffff; border-radius: 15px;
+            padding: 10px 20px; font-size: 24px; font-family: 'Arial';
+            text-shadow: 1px 1px 3px #000000;
+        }""")
         etiqueta_bienvenida.setAlignment(Qt.AlignCenter)
 
-        # Añadir la imagen y el texto al layout, con espaciado
-        layout.addStretch()  # Añadir un espacio antes de la imagen
-        layout.addWidget(imagen, alignment=Qt.AlignCenter)  # Centrar la imagen
-        layout.addWidget(etiqueta_bienvenida, alignment=Qt.AlignCenter)  # Centrar el texto
-        layout.addStretch()  # Añadir un espacio después del texto
+        # Añadir la imagen y el texto al layout
+        layout.addStretch()
+        layout.addWidget(imagen, alignment=Qt.AlignCenter)
+        layout.addWidget(etiqueta_bienvenida, alignment=Qt.AlignCenter)
+        layout.addStretch()
 
         self.pantalla_principal.setLayout(layout)
         self.stacked_widget.setCurrentWidget(self.pantalla_principal)
-
-
 
     def abrir_modulo_cxc(self):
         self.cambiar_modulo(VentanaCXC(self.stacked_widget))
