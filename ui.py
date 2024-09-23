@@ -2,14 +2,15 @@ import os
 import sys
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QStackedWidget,
-    QDialog, QComboBox, QDateEdit, QMessageBox
+    QDialog, QComboBox, QDateEdit, QMessageBox, QSpinBox
 )
 from PyQt5.QtGui import QFont, QIcon, QPixmap
-from PyQt5.QtCore import QSize, QDate, Qt
+from PyQt5.QtCore import QSize, Qt, QDate
 from charts import (
     mostrar_graficas_consumado, mostrar_deudas_por_empresa, 
     consultar_creditos_por_empresa, filtrar_y_graficar,
-    ver_consumado_por_cliente, ver_todas_las_ventas, ver_devoluciones_por_empresa
+    ver_consumado_por_cliente, ver_todas_las_ventas, ver_devoluciones_por_empresa,
+    mostrar_ventas_por_mes
 )
 
 def resource_path(relative_path):
@@ -21,7 +22,6 @@ def resource_path(relative_path):
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("JP FLOWERS - MENÚ PRINCIPAL")
         self.setGeometry(100, 100, 900, 600)
         self.initUI()
@@ -34,7 +34,7 @@ class VentanaPrincipal(QMainWindow):
 
         self.menu_lateral = QWidget()
         self.menu_lateral.setFixedWidth(200)
-        self.menu_lateral.setStyleSheet("""background-color: #2e2e2e; color: white;""")
+        self.menu_lateral.setStyleSheet("background-color: #2e2e2e; color: white;")
         menu_layout = QVBoxLayout()
 
         boton_inicio = self.crear_boton_menu("Inicio", "icons/home_icon.png")
@@ -64,38 +64,38 @@ class VentanaPrincipal(QMainWindow):
         boton.setIcon(QIcon(icono))
         boton.setIconSize(QSize(24, 24))
         boton.setFont(QFont('Arial', 12))
-        boton.setStyleSheet("""QPushButton {
-            background-color: #4a4a4a; color: white; border: 1px solid #007f00;
-            padding: 10px; text-align: left; border-radius: 8px;
-        } QPushButton:hover {
-            background-color: #66bb66; color: white; border: 1px solid #00cc00;
-        }""")
+        boton.setStyleSheet("""
+            QPushButton {
+                background-color: #4a4a4a; color: white; border: 1px solid #007f00;
+                padding: 10px; text-align: left; border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #66bb66; color: white; border: 1px solid #00cc00;
+            }
+        """)
         return boton
 
     def mostrar_pantalla_principal(self):
         layout = QVBoxLayout()
 
-        # Crear una etiqueta para mostrar la imagen de fondo
         imagen = QLabel(self)
         pixmap = QPixmap(resource_path('descarga.jpeg'))  # Ruta de la imagen
         imagen.setPixmap(pixmap)
-
-        # Establecer tamaño adecuado para la imagen
         imagen.setFixedSize(500, 300)
         imagen.setAlignment(Qt.AlignCenter)
 
-        # Crear una etiqueta para el texto de bienvenida
         etiqueta_bienvenida = QLabel(" Bienvenidos al sistema de análisis de datos de JP FLOWERS ", self)
         etiqueta_bienvenida.setFont(QFont('Arial', 24, QFont.Bold))
-        etiqueta_bienvenida.setStyleSheet("""QLabel {
-            color: #ffffff; background-color: rgba(46, 139, 87, 204);
-            border: 2px solid #ffffff; border-radius: 15px;
-            padding: 10px 20px; font-size: 24px; font-family: 'Arial';
-            text-shadow: 1px 1px 3px #000000;
-        }""")
+        etiqueta_bienvenida.setStyleSheet("""
+            QLabel {
+                color: #ffffff; background-color: rgba(46, 139, 87, 204);
+                border: 2px solid #ffffff; border-radius: 15px;
+                padding: 10px 20px; font-size: 24px; font-family: 'Arial';
+                text-shadow: 1px 1px 3px #000000;
+            }
+        """)
         etiqueta_bienvenida.setAlignment(Qt.AlignCenter)
 
-        # Añadir la imagen y el texto al layout
         layout.addStretch()
         layout.addWidget(imagen, alignment=Qt.AlignCenter)
         layout.addWidget(etiqueta_bienvenida, alignment=Qt.AlignCenter)
@@ -124,6 +124,7 @@ class VentanaCXC(QWidget):
     def initUI(self):
         layout = QVBoxLayout()
 
+        # Botones
         boton_grafica_consumado = self.crear_boton_con_icono("Mostrar Ventas por Cliente", "icons/chart_icon.png")
         boton_grafica_consumado.clicked.connect(mostrar_graficas_consumado)
         layout.addWidget(boton_grafica_consumado)
@@ -140,6 +141,10 @@ class VentanaCXC(QWidget):
         boton_filtrar_graficar.clicked.connect(self.abrir_dialogo_filtrar_y_graficar)
         layout.addWidget(boton_filtrar_graficar)
 
+        boton_ventas_por_mes = self.crear_boton_con_icono("Mostrar Ventas por Mes", "icons/calendar_icon.png")
+        boton_ventas_por_mes.clicked.connect(self.abrir_dialogo_ventas_por_mes)
+        layout.addWidget(boton_ventas_por_mes)
+
         self.setLayout(layout)
 
     def crear_boton_con_icono(self, texto, icono):
@@ -148,15 +153,11 @@ class VentanaCXC(QWidget):
         boton.setIcon(QIcon(icono))
         boton.setStyleSheet("""
             QPushButton {
-                background-color: #1a1a1a;
-                color: #00cc66;
-                border: 2px solid #00cc66;
-                border-radius: 10px;
-                padding: 10px;
+                background-color: #1a1a1a; color: #00cc66; border: 2px solid #00cc66;
+                border-radius: 10px; padding: 10px;
             }
             QPushButton:hover {
-                background-color: #333333;
-                border-color: #00ff99;
+                background-color: #333333; border-color: #00ff99;
             }
         """)
         return boton
@@ -201,22 +202,71 @@ class VentanaCXC(QWidget):
         layout.addWidget(boton_generar)
 
         dialogo.setLayout(layout)
-        dialogo.exec()
+        dialogo.exec_()
 
     def procesar_filtrar_y_graficar(self, cliente, fecha_inicio, fecha_fin, dialogo):
         try:
             filtrar_y_graficar(cliente, fecha_inicio, fecha_fin)
+            dialogo.accept()
         except Exception as e:
+            QMessageBox.critical(self, "Error", str(e))
+
+    def abrir_dialogo_ventas_por_mes(self):
+        # Crear un diálogo modal para seleccionar mes y año
+        dialogo = QDialog(self)
+        dialogo.setWindowTitle('Mostrar Ventas por Mes')
+
+        layout = QVBoxLayout()
+
+        # Etiqueta y combo box para seleccionar el mes
+        mes_label = QLabel("Selecciona el mes:")
+        layout.addWidget(mes_label)
+
+        mes_combo = QComboBox()
+        meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", 
+                "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        mes_combo.addItems(meses)
+        layout.addWidget(mes_combo)
+
+        # Etiqueta y spin box para seleccionar el año
+        año_label = QLabel("Selecciona el año:")
+        layout.addWidget(año_label)
+
+        año_spin = QSpinBox()
+        año_spin.setRange(2000, 2100)
+        año_spin.setValue(QDate.currentDate().year())  # Valor por defecto
+        layout.addWidget(año_spin)
+
+        # Botón para mostrar el gráfico de ventas
+        boton_mostrar = QPushButton("Mostrar gráfico de ventas")
+        boton_mostrar.clicked.connect(lambda: self.procesar_mostrar_ventas_por_mes(mes_combo.currentText(), año_spin.value(), dialogo))
+
+        layout.addWidget(boton_mostrar)
+
+        dialogo.setLayout(layout)
+        dialogo.exec_()
+
+    def procesar_mostrar_ventas_por_mes(self, mes, año, dialogo):
+        try:
+            # Convertir el nombre del mes a un número
+            mes_numero = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                        "Julio", "Agosto", "Septiembre", "Octubre", 
+                        "Noviembre", "Diciembre"].index(mes) + 1
+            
+            # Llamar a la función que genera el gráfico de ventas por mes y año
+            from charts import mostrar_ventas_por_mes
+            mostrar_ventas_por_mes(mes_numero, año)
+            
+        except Exception as e:
+            # Mostrar mensaje de error si algo sale mal
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
-            msg.setText(f"Error al filtrar y graficar: {str(e)}")
+            msg.setText(f"Error al mostrar ventas por mes: {str(e)}")
             msg.setWindowTitle("Error")
             msg.exec()
         finally:
-            dialogo.accept()  # Cierra el diálogo
+            dialogo.accept()  # Cierra el diálogo una vez se ha mostrado o generado el gráfico
 
-    def regresar_menu_principal(self):
-        self.stacked_widget.setCurrentIndex(0)
 
 
 class VentanaREMNAL(QWidget):
@@ -325,4 +375,4 @@ class VentanaREMNAL(QWidget):
             msg.setWindowTitle("Error")
             msg.exec()
         # No cambiar de vista, solo cerrar el diálogo
-        self.close()  # Cierra la ventana actual (pestaña)
+        self.close()  # Cierra la ventana actual (pestaña)

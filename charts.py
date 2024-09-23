@@ -10,6 +10,9 @@ app = QApplication(sys.argv)
 
 # Función para aplicar el estilo gráfico actualizado
 def estilo_grafico(ventas_por_cliente, titulo, xlabel, ylabel):
+    # Ordenar de mayor a menor antes de graficar
+    ventas_por_cliente = ventas_por_cliente.sort_values(ascending=False)
+    
     fig, ax = plt.subplots(figsize=(20, 10))
     fig.patch.set_facecolor('lightgreen')
     ax.set_facecolor('lightgray')
@@ -21,12 +24,42 @@ def estilo_grafico(ventas_por_cliente, titulo, xlabel, ylabel):
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.grid(axis='y', linestyle='--', alpha=0.7)
     for container in ax.containers:
-        ax.bar_label(container, label_type='edge', fontsize=8, rotation=0)
+        ax.bar_label(container, label_type='edge', fontsize=6, rotation=0)
     plt.tight_layout()
     plt.get_current_fig_manager().window.showMaximized()
     plt.show(block=False)
+    
+def mostrar_ventas_por_mes(mes, año):
+    from data import cargar_datos_cxc
+    df = cargar_datos_cxc()
 
-# Funciones para Clientes Internacionales (CXC)
+    # Convertir la columna de fechas a tipo datetime
+    df['DATE'] = pd.to_datetime(df['DATE'])
+
+    # Filtrar las ventas para el mes y año específico
+    df_mes = df[(df['DATE'].dt.month == mes) & (df['DATE'].dt.year == año)]
+
+    # Agrupar las ventas del mes por día
+    ventas_por_dia = df_mes.groupby(df_mes['DATE'].dt.day)['TOTAL US$'].sum()
+
+    if ventas_por_dia.empty:
+        print(f"No hay ventas para {mes}/{año}")
+        return
+
+    # Crear el gráfico de torta
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.pie(ventas_por_dia, labels=ventas_por_dia.index.astype(str), autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')  # Asegura que el gráfico de torta sea circular.
+
+    # Título del gráfico
+    mes_nombre = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][mes-1]
+    plt.title(f'Ventas Totales para {mes_nombre} {año}', fontsize=16, fontweight='bold')
+    plt.show()
+
+
+
+ 
+
 def mostrar_graficas_consumado():
     from data import cargar_datos_cxc
     df = cargar_datos_cxc()
