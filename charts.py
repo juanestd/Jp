@@ -31,6 +31,9 @@ def estilo_grafico(ventas_por_cliente, titulo, xlabel, ylabel):
     
 def mostrar_ventas_por_mes(mes, año):
     from data import cargar_datos_cxc
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    
     df = cargar_datos_cxc()
 
     # Convertir la columna de fechas a tipo datetime
@@ -39,26 +42,42 @@ def mostrar_ventas_por_mes(mes, año):
     # Filtrar las ventas para el mes y año específico
     df_mes = df[(df['DATE'].dt.month == mes) & (df['DATE'].dt.year == año)]
 
-    # Agrupar las ventas del mes por día
-    ventas_por_dia = df_mes.groupby(df_mes['DATE'].dt.day)['TOTAL US$'].sum()
+    # Agrupar las ventas del mes por empresa y ordenarlas de mayor a menor
+    ventas_por_empresa = df_mes.groupby('CUSTOMER')['TOTAL US$'].sum().sort_values(ascending=False)
 
-    if ventas_por_dia.empty:
+    if ventas_por_empresa.empty:
         print(f"No hay ventas para {mes}/{año}")
         return
 
     # Crear el gráfico de torta
     fig, ax = plt.subplots(figsize=(10, 10))
-    ax.pie(ventas_por_dia, labels=ventas_por_dia.index.astype(str), autopct='%1.1f%%', startangle=90)
+    wedges, texts = ax.pie(ventas_por_empresa, labels=None, startangle=90, colors=plt.cm.Paired.colors)
     ax.axis('equal')  # Asegura que el gráfico de torta sea circular.
 
-    # Título del gráfico
+    # Calcular el total de ventas y los porcentajes
+    total_ventas = ventas_por_empresa.sum()
+    porcentajes = [f'{(valor / total_ventas) * 100:.2f}%' for valor in ventas_por_empresa]
+    numeros_ventas = ventas_por_empresa.values
+
+    # Añadir la leyenda con los nombres de las empresas, porcentajes y números de ventas
+    leyenda_textos = [f'{empresa}: {porcentaje} ({numero:.2f})' for empresa, porcentaje, numero in zip(ventas_por_empresa.index, porcentajes, numeros_ventas)]
+    ax.legend(wedges, leyenda_textos, title="Empresas", loc="center left", bbox_to_anchor=(0.8, 0.5))
+
+    # Eliminar el eje adicional y mover el texto del total de ventas dentro del gráfico
+    ax.annotate(f'Total Ventas: {total_ventas:.2f}', xy=(0, -1.2), fontsize=12, ha='center', va='center')
+
+    # Título en la parte superior de la torta
     mes_nombre = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][mes-1]
-    plt.title(f'Ventas Totales para {mes_nombre} {año}', fontsize=16, fontweight='bold')
+    plt.title(f'Ventas Totales por Empresa para {mes_nombre} {año}', fontsize=16, fontweight='bold')
+
+    # Mostrar el gráfico
     plt.show()
 
 
 
- 
+
+
+
 
 def mostrar_graficas_consumado():
     from data import cargar_datos_cxc
