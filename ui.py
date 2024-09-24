@@ -10,7 +10,7 @@ from charts import (
     mostrar_graficas_consumado, mostrar_deudas_por_empresa, 
     consultar_creditos_por_empresa, filtrar_y_graficar,
     ver_consumado_por_cliente, ver_todas_las_ventas, ver_devoluciones_por_empresa,
-    mostrar_ventas_por_mes
+    mostrar_ventas_por_mes, mostrar_ventas_por_mes_rem_nal
 )
 
 def resource_path(relative_path):
@@ -289,6 +289,14 @@ class VentanaREMNAL(QWidget):
         boton_devoluciones_empresa = self.crear_boton_con_icono("Ver devoluciones por empresa", "icons/return_icon.png")
         boton_devoluciones_empresa.clicked.connect(ver_devoluciones_por_empresa)
         layout.addWidget(boton_devoluciones_empresa)
+        
+          # Nuevo botón para una nueva funcionalidad que desees añadir
+        nuevo_boton = self.crear_boton_con_icono("Ver ventas totales por mes", "icons/new_icon.png")
+        nuevo_boton.clicked.connect(self.abrir_dialogo_ventas_por_mes_remnal)
+        layout.addWidget(nuevo_boton)
+
+        self.setLayout(layout)
+
 
         self.setLayout(layout)
 
@@ -364,7 +372,64 @@ class VentanaREMNAL(QWidget):
             msg.exec()
         finally:
             dialogo.accept()  # Cierra el diálogo
+            
+    def abrir_dialogo_ventas_por_mes_remnal(self):
+        # Crear un diálogo modal para seleccionar mes y año
+        dialogo = QDialog(self)
+        dialogo.setWindowTitle('Mostrar Ventas por Mes (REMNAL)')
 
+        layout = QVBoxLayout()
+
+        # Etiqueta y combo box para seleccionar el mes
+        mes_label = QLabel("Selecciona el mes:")
+        layout.addWidget(mes_label)
+
+        mes_combo = QComboBox()
+        meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", 
+                "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        mes_combo.addItems(meses)
+        layout.addWidget(mes_combo)
+
+        # Etiqueta y spin box para seleccionar el año
+        año_label = QLabel("Selecciona el año:")
+        layout.addWidget(año_label)
+
+        año_spin = QSpinBox()
+        año_spin.setRange(2000, 2100)
+        año_spin.setValue(QDate.currentDate().year())  # Valor por defecto
+        layout.addWidget(año_spin)
+
+        # Botón para mostrar el gráfico de ventas
+        boton_mostrar = QPushButton("Mostrar gráfico de ventas")
+        boton_mostrar.clicked.connect(lambda: self.procesar_mostrar_ventas_por_mes_remnal(mes_combo.currentText(), año_spin.value(), dialogo))
+
+        layout.addWidget(boton_mostrar)
+
+        dialogo.setLayout(layout)
+        dialogo.exec_()
+
+    def procesar_mostrar_ventas_por_mes_remnal(self, mes, año, dialogo):
+        try:
+            # Convertir el nombre del mes a un número
+            mes_numero = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                        "Julio", "Agosto", "Septiembre", "Octubre", 
+                        "Noviembre", "Diciembre"].index(mes) + 1
+            
+            # Llamar a la función que genera el gráfico de ventas por mes y año
+            from charts import mostrar_ventas_por_mes_rem_nal
+            mostrar_ventas_por_mes_rem_nal(mes_numero, año)
+            
+        except Exception as e:
+            # Mostrar mensaje de error si algo sale mal
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText(f"Error al mostrar ventas por mes (REMNAL): {str(e)}")
+            msg.setWindowTitle("Error")
+            msg.exec()
+        finally:
+            dialogo.accept()  # Cierra el diálogo una vez se ha mostrado o generado el gráfico
+            
+            
     def procesar_ver_todas_las_ventas(self):
         try:
             ver_todas_las_ventas()
