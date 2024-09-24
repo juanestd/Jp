@@ -291,12 +291,20 @@ def mostrar_devoluciones(cliente, df):
     if devoluciones_cliente.empty:
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
-        msg.setText(f"La empresa {cliente} no tiene devoluciones registradas.")
-        msg.setWindowTitle("Sin Devoluciones")
+        msg.setText(f"No hay devoluciones para el cliente {cliente}.")
+        msg.setWindowTitle("Sin Datos")
         msg.exec_()
-    else:
-        devoluciones_por_fecha = devoluciones_cliente.groupby('FECHA')['DEVOLUCION US$'].sum()
-        estilo_grafico(devoluciones_por_fecha, f'Devoluciones de {cliente}', 'Fecha', 'Total Devoluciones en US$')
+        return
+
+    # Agrupar y sumar devoluciones por fecha
+    devoluciones_por_fecha = devoluciones_cliente.groupby('FECHA')['DEVOLUCION US$'].sum()
+
+    # Calcular el total de devoluciones
+    total_devoluciones = devoluciones_por_fecha.sum()
+
+    # Mostrar el gráfico incluyendo el total
+    estilo_grafico(devoluciones_por_fecha, f'Devoluciones de {cliente}', 'Fecha', 'Total Devoluciones en US$', total=total_devoluciones)
+
 
 def mostrar_ventas_por_mes_rem_nal(mes, año):
     from data import cargar_datos_rem_nal
